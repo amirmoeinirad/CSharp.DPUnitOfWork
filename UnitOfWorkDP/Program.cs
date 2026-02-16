@@ -1,15 +1,15 @@
-﻿
-// Amir Moeini Rad
-// May 3, 2025
+﻿// Amir Moeini Rad
+// May, 2025
 
 // Main Concept: The Unit of Work Design Pattern
+
 // In this pattern, a Unit of Work class coordinates the work of multiple repositories
 // by managing changes and ensuring consistency.
 // In modern .NET, this pattern as well as the Repository pattern are often implemented using Entity Framework Core's DbContext,
 // which acts as a Unit of Work and provides DbSet<T> properties that act as repositories for each entity type.
 
 
-namespace UnitOfWorkExample
+namespace UnitOfWorkDP
 {
     // Domain Model/Class
     // In a real application, this class is mapped to a database table.
@@ -27,6 +27,7 @@ namespace UnitOfWorkExample
 
 
     // Repository Interface (Design Pattern)
+    // In a real scenario, a generic repository can be created for all entity types.
     public interface IUserRepository
     {
         // CRUD Operations
@@ -43,7 +44,7 @@ namespace UnitOfWorkExample
     public class UserRepository : IUserRepository
     {
         // In-memory list to simulate a database table
-        private readonly List<User> _users = new List<User>();
+        private readonly List<User> _users = [];
 
         public void Add(User user)
         {
@@ -66,7 +67,7 @@ namespace UnitOfWorkExample
         // A property to get the UserRepository
         IUserRepository Users { get; }
 
-        // Commit all changes (in a real application, this would save changes to the database)
+        // Commit all changes (in a real application, this would save changes to the database.)
         void Save();
     }
 
@@ -92,7 +93,7 @@ namespace UnitOfWorkExample
     /////////////////////////////////////
 
 
-    // Application
+    // Main Application
     class Program
     {
         static void Main(string[] args)
@@ -102,7 +103,7 @@ namespace UnitOfWorkExample
             Console.WriteLine("------------------------------------------\n");
 
 
-            IUnitOfWork unitOfWork = new UnitOfWork();
+            UnitOfWork unitOfWork = new();
 
             var user1 = new User { Id = 1, Name = "Alice" };
             var user2 = new User { Id = 2, Name = "Bob" };
