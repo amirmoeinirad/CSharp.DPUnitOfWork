@@ -5,13 +5,14 @@
 
 // In this pattern, a Unit of Work class coordinates the work of multiple repositories
 // by managing changes and ensuring consistency.
-// In modern .NET, this pattern as well as the Repository pattern are often implemented using Entity Framework Core's DbContext,
-// which acts as a Unit of Work and provides DbSet<T> properties that act as repositories for each entity type.
+// In modern .NET, this pattern as well as the Repository pattern are implemented using Entity Framework Core:
+// - DbContext acts as a Unit of Work
+// - DbSet<T> properties act as repositories for each entity type.
 
 
 namespace UnitOfWorkDP
 {
-    // Domain Model/Class
+    // Domain Model/Entity
     // In a real application, this class is mapped to a database table.
     public class User
     {
@@ -30,8 +31,6 @@ namespace UnitOfWorkDP
     // In a real scenario, a generic repository can be created for all entity types.
     public interface IUserRepository
     {
-        // CRUD Operations
-
         // Add a new user
         void Add(User user);
 
@@ -40,7 +39,7 @@ namespace UnitOfWorkDP
     }
 
 
-    // Repository Implementation (in-memory)
+    // Repository Implementation
     public class UserRepository : IUserRepository
     {
         // In-memory list to simulate a database table
@@ -110,6 +109,7 @@ namespace UnitOfWorkDP
 
             // UnitOfWork is used instead of individual repositories such as UserRepository.
             // UnitOfWork is used to coordinate all repositories.
+            // In a real senario, user1 & user2 are not yet added to the database (before calling Save()).
             unitOfWork.Users.Add(user1);
             unitOfWork.Users.Add(user2);
 
