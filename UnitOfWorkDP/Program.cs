@@ -5,9 +5,6 @@
 
 // In this pattern, a Unit of Work class coordinates the work of multiple repositories
 // by managing changes and ensuring consistency.
-// In modern .NET, this pattern as well as the Repository pattern are implemented using Entity Framework Core:
-// - DbContext acts as a Unit of Work
-// - DbSet<T> properties act as repositories for each entity type.
 
 
 namespace UnitOfWorkDP
@@ -23,48 +20,54 @@ namespace UnitOfWorkDP
         public string? Name { get; set; }
     }
 
+    public class Admin
+    {
+        public int Id { get; set; }
+        public string? Name { get; set; }
+    }
+
 
     /////////////////////////////////////
 
 
-    // Repository Interface (Design Pattern)
-    // In a real scenario, a generic repository can be created for all entity types.
-    public interface IUserRepository
+    // Generic Repository Interface
+    public interface IRepository<TEntity>
     {
         // Add a new user
-        void Add(User user);
+        void Add(TEntity entity);
 
         // Get all users
-        List<User> GetAll();
+        List<TEntity> GetAll();
     }
 
 
     // Repository Implementation
-    public class UserRepository : IUserRepository
+    public class Repository<TEntity> : IRepository<TEntity>
     {
         // In-memory list to simulate a database table
-        private readonly List<User> _users = [];
+        private readonly List<TEntity> _entities = [];
 
-        public void Add(User user)
+        public void Add(TEntity entity)
         {
-            _users.Add(user);
+            _entities.Add(entity);
 
-            Console.WriteLine($"User '{user.Name}' added to repository.");
+            Console.WriteLine($"A/An {typeof(TEntity).Name} was added to the repository.");
         }
         
-        public List<User> GetAll() => _users;
+        public List<TEntity> GetAll() => _entities;
     }
 
 
     /////////////////////////////////////
 
 
-    // Unit of Work Interface (Design Pattern)
+    // Unit of Work Interface
     // UnitOfWork coordinates changes across one or more repositories.
     public interface IUnitOfWork
     {
-        // A property to get the UserRepository
-        IUserRepository Users { get; }
+        // A property to get the Repository
+        IRepository<User> Users { get; }
+        IRepository<Admin> Admins { get; }
 
         // Commit all changes (in a real application, this would save changes to the database.)
         void Save();
@@ -74,17 +77,18 @@ namespace UnitOfWorkDP
     // Unit of Work Implementation
     public class UnitOfWork : IUnitOfWork
     {
-        public IUserRepository Users { get; private set; }
+        private IRepository<User>? _users;
+        private IRepository<Admin>? _admins;
 
-        public UnitOfWork()
-        {
-            Users = new UserRepository();
-        }
+        // Lazy initialization.
+        public IRepository<User> Users => _users ??= new Repository<User>();
+        public IRepository<Admin> Admins => _admins ??= new Repository<Admin>();
+
 
         public void Save()
         {
             // Simulate commit
-            Console.WriteLine("\nAll changes have been saved (simulated commit).");
+            Console.WriteLine("All changes have been saved.");
         }
     }
 
@@ -107,11 +111,21 @@ namespace UnitOfWorkDP
             var user1 = new User { Id = 1, Name = "Alice" };
             var user2 = new User { Id = 2, Name = "Bob" };
 
+            var admin1 = new Admin { Id = 1, Name = "Tom" };
+            var admin2 = new Admin { Id = 2, Name = "Peter" };
+
             // UnitOfWork is used instead of individual repositories such as UserRepository.
             // UnitOfWork is used to coordinate all repositories.
             // In a real senario, user1 & user2 are not yet added to the database (before calling Save()).
             unitOfWork.Users.Add(user1);
+            Console.WriteLine($"Name: {user1.Name}\n");
             unitOfWork.Users.Add(user2);
+            Console.WriteLine($"Name: {user2.Name}\n");
+
+            unitOfWork.Admins.Add(admin1);
+            Console.WriteLine($"Name: {admin1.Name} \n");
+            unitOfWork.Admins.Add(admin2);
+            Console.WriteLine($"Name: {admin2.Name} \n");
 
             // In a real application, this would persist changes to the database.
             // In other words, all changes (CRUD operations) made through the repositories are committed in a single transaction.
